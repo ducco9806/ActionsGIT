@@ -1,0 +1,21 @@
+name: Build with Visual Studio Developer Command Prompt
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # Lấy mã nguồn từ Kho Lưu Trữ
+
+      - name: Setup Visual Studio Developer Command Prompt
+        uses: egor-tensin/vs-shell@v2 # Thiết lập VS Developer Command Prompt
+
+      - name: Restore Nuget packages
+        run: nuget restore MyProject.sln # Khôi phục các package nếu cần
+
+      - name: Build project with devenv
+        run: devenv Myproject.sln/Build Release # Biên dịch dự án bằng Visual Studio
+    
