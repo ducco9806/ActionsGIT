@@ -8,30 +8,22 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # Lấy mã nguồn từ Kho Lưu Trữ
+        uses: actions/checkout@v4
 
-      - name: Setup Visual Studio Developer Command Prompt
-        uses: egor-tensin/vs-shell@v2 # Thiết lập VS Developer Command Prompt
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
 
       - name: Restore Nuget packages
-        run: nuget restore MyProject.sln # Khôi phục các package nếu cần
+        run: nuget restore MyProject.sln
 
-      - name: Build project with devenv
-        run: devenv Myproject.sln/Build Release # Biên dịch dự án bằng Visual Studio
+      - name: Build project with MSBuild
+        run: msbuild MyProject.sln /p:Configuration=Release
 
       - name: Kustomize Edit image
-      # You may pin to the exact commit or the version.
-      # uses: williamhogman/kustomize-set-image-hook@c9f7c8ae7aa5ea6224bc39376e8d300d04757068
         uses: williamhogman/kustomize-set-image-hook@v1.5
-          with:
-          # The path to the working directory
-            workingDirectory: # default is .
-            # The path to the folder containing the kustomization
-            kustomizePath: # default is .
-            # Name of the image to replace the image
-            name: 
-            # The new tag for the named image
-            newTag: 
-            # 
-            newName: 
-          
+        with:
+          workingDirectory: .
+          kustomizePath: .
+          name: my-image
+          newTag: latest
+          newName: my-image-new
