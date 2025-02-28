@@ -1,29 +1,54 @@
-name: Build with Visual Studio Developer Command Prompt
+name: Deploy Website to Github Pages
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main # Chạy khi có thay đổi trên nhánh chính
+  pull_request:
+    branches:
+      - main # Kiểm tra trên pull_request trước khi merge
 
 jobs:
-  build:
-    runs-on: windows-latest
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1
-
-      - name: Restore Nuget packages
-        run: nuget restore MyProject.sln
-
-      - name: Build project with MSBuild
-        run: msbuild MyProject.sln /p:Configuration=Release
-
-      - name: Kustomize Edit image
-        uses: williamhogman/kustomize-set-image-hook@v1.5
+      - name: Setup Node.js (nếu dùng React/Next.js)
+        uses: actions/setup-node@v3
         with:
-          workingDirectory: .
-          kustomizePath: .
-          name: my-image
-          newTag: latest
-          newName: my-image-new
+          node-version: 18
+
+      - name: Install dependencies (nếu có)
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          fi
+          
+      - name: Build website (nếu có)
+        run: |
+          if [ -f package.json ]; then
+            npm run build
+          fi
+          
+      - name: Deploy to Github Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages # Nhánh để chứa trang web đã build
+          folder: build # Thư mục chứa nội dung trang (React: "build", Jekyll: "_site", Hugo: "public")
+          clean: true
+
+  codespace-preview:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start Live Server for Codespaces
+        run: |
+          npm install -g live-server
+          live-server --port=8080 --no-browser
