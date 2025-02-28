@@ -26,6 +26,9 @@ jobs:
           if [ -f package.json ]; then
             npm install
           fi
+
+      - name: Clean old deployment files
+        run: rm -rf build/ _site/ public/
           
       - name: Build website (nếu có)
         run: |
